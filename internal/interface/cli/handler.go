@@ -13,10 +13,12 @@ func HandleUser(repo domain.UserRepository, args []string) {
 		usecase.Users(repo)
 	case "add":
 		usecase.AddUser(repo, args[1:])
+	case "activate":
+		usecase.ActivateUser(repo, args[1:])
 	case "deact":
 		usecase.DeactUser(repo, args[1:])
-	case "change":
-		usecase.ChangeUser(repo, args[1:])
+	case "update":
+		usecase.UpdateUser(repo, args[1:])
 	case "switch":
 		usecase.SwitchUser(repo, args[1:])
 	case "info":

@@ -48,7 +48,7 @@ func (repo *JSONUserRepo) GetAll() ([]domain.User, error) {
 	return users, nil
 }
 
-func (repo *JSONUserRepo) Find(login, name string) (*domain.User, error) {
+func (repo *JSONUserRepo) FindLogName(login, name string) (*domain.User, error) {
 	users, err := repo.GetAll()
 	if err != nil {
 		return nil, err
@@ -56,6 +56,21 @@ func (repo *JSONUserRepo) Find(login, name string) (*domain.User, error) {
 
 	for _, user := range users {
 		if user.Login == login && user.Name == name {
+			return &user, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (repo *JSONUserRepo) FindId(id int) (*domain.User, error) {
+	users, err := repo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, user := range users {
+		if user.Id == id {
 			return &user, nil
 		}
 	}
@@ -104,14 +119,124 @@ func (repo *JSONUserRepo) Save(user domain.User) error {
 }
 
 func (repo *JSONUserRepo) Update(user domain.User) error {
+	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR, 0666)
+	if err != nil {
+		return err
+	}
+
+	defer func(jsonDb *os.File) {
+		err := jsonDb.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(jsonDb)
+
+	users, err := repo.GetAll()
+	if err != nil {
+		return err
+	}
+
+	users[user.Id] = user
+
+	newUsers, err := json.MarshalIndent(users, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	if err = jsonDb.Truncate(0); err != nil {
+		return err
+	}
+	if _, err := jsonDb.Seek(0, 0); err != nil {
+		return err
+	}
+
+	_, err = jsonDb.Write(newUsers)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (repo *JSONUserRepo) Activate(userID int) error {
+	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR, 0666)
+	if err != nil {
+		return err
+	}
+
+	defer func(jsonDb *os.File) {
+		err := jsonDb.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(jsonDb)
+
+	users, err := repo.GetAll()
+	if err != nil {
+		return err
+	}
+
+	users[userID].Status = true
+
+	newUsers, err := json.MarshalIndent(users, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	if err = jsonDb.Truncate(0); err != nil {
+		return err
+	}
+	if _, err := jsonDb.Seek(0, 0); err != nil {
+		return err
+	}
+
+	_, err = jsonDb.Write(newUsers)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 	return nil
 }
 
 func (repo *JSONUserRepo) Deactivate(userID int) error {
+	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR, 0666)
+	if err != nil {
+		return err
+	}
+
+	defer func(jsonDb *os.File) {
+		err := jsonDb.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(jsonDb)
+
+	users, err := repo.GetAll()
+	if err != nil {
+		return err
+	}
+
+	users[userID].Status = false
+
+	newUsers, err := json.MarshalIndent(users, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	if err = jsonDb.Truncate(0); err != nil {
+		return err
+	}
+	if _, err := jsonDb.Seek(0, 0); err != nil {
+		return err
+	}
+
+	_, err = jsonDb.Write(newUsers)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
