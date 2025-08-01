@@ -7,8 +7,47 @@ import (
 	"github.com/pmescheriakov/Habit-Tracker/internal/domain"
 )
 
-func Users(repo domain.UserRepository) {
+func printUsers(users []domain.User) {
+	if len(users) == 0 {
+		fmt.Println("No users found")
+		return
+	}
 
+	for _, user := range users {
+		status := "inactive"
+		if user.Status {
+			status = "active"
+		}
+
+		fmt.Printf("ID: %d | Login: %s | Name: %s | Status: %s\n", user.Id, user.Login, user.Name, status)
+	}
+}
+
+func ActiveUsers(repo domain.UserRepository) {
+	users, err := repo.GetAll()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	activeUsers := make([]domain.User, 0)
+	for _, user := range users {
+		if user.Status {
+			activeUsers = append(activeUsers, user)
+		}
+	}
+
+	printUsers(activeUsers)
+}
+
+func Users(repo domain.UserRepository) {
+	users, err := repo.GetAll()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	printUsers(users)
 }
 
 func AddUser(repo domain.UserRepository, args []string) {

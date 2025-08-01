@@ -9,6 +9,8 @@ import (
 
 func HandleUser(repo domain.UserRepository, args []string) {
 	switch args[0] {
+	case "active_users":
+		usecase.ActiveUsers(repo)
 	case "users":
 		usecase.Users(repo)
 	case "add":

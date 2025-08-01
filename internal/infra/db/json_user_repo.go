@@ -17,13 +17,35 @@ func NewJSONUserRepo(path string) *JSONUserRepo {
 	return &JSONUserRepo{filePath: path}
 }
 
+func (repo *JSONUserRepo) writeUsers(users []domain.User) error {
+	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR|os.O_TRUNC, 0666)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err = jsonDb.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	data, err := json.MarshalIndent(users, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	if _, err := jsonDb.Write(data); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (repo *JSONUserRepo) GetAll() ([]domain.User, error) {
 	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR, 0666)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
-
 	defer func(jsonDb *os.File) {
 		err := jsonDb.Close()
 		if err != nil {
@@ -79,18 +101,6 @@ func (repo *JSONUserRepo) FindId(id int) (*domain.User, error) {
 }
 
 func (repo *JSONUserRepo) Save(user domain.User) error {
-	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR, 0666)
-	if err != nil {
-		return err
-	}
-
-	defer func(jsonDb *os.File) {
-		err := jsonDb.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(jsonDb)
-
 	users, err := repo.GetAll()
 	if err != nil {
 		return err
@@ -98,39 +108,10 @@ func (repo *JSONUserRepo) Save(user domain.User) error {
 
 	users = append(users, user)
 
-	newUsers, err := json.MarshalIndent(users, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	if err = jsonDb.Truncate(0); err != nil {
-		return err
-	}
-	if _, err := jsonDb.Seek(0, 0); err != nil {
-		return err
-	}
-
-	_, err = jsonDb.Write(newUsers)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return repo.writeUsers(users)
 }
 
 func (repo *JSONUserRepo) Update(user domain.User) error {
-	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR, 0666)
-	if err != nil {
-		return err
-	}
-
-	defer func(jsonDb *os.File) {
-		err := jsonDb.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(jsonDb)
-
 	users, err := repo.GetAll()
 	if err != nil {
 		return err
@@ -138,39 +119,10 @@ func (repo *JSONUserRepo) Update(user domain.User) error {
 
 	users[user.Id] = user
 
-	newUsers, err := json.MarshalIndent(users, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	if err = jsonDb.Truncate(0); err != nil {
-		return err
-	}
-	if _, err := jsonDb.Seek(0, 0); err != nil {
-		return err
-	}
-
-	_, err = jsonDb.Write(newUsers)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return repo.writeUsers(users)
 }
 
 func (repo *JSONUserRepo) Activate(userID int) error {
-	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR, 0666)
-	if err != nil {
-		return err
-	}
-
-	defer func(jsonDb *os.File) {
-		err := jsonDb.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(jsonDb)
-
 	users, err := repo.GetAll()
 	if err != nil {
 		return err
@@ -178,41 +130,10 @@ func (repo *JSONUserRepo) Activate(userID int) error {
 
 	users[userID].Status = true
 
-	newUsers, err := json.MarshalIndent(users, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	if err = jsonDb.Truncate(0); err != nil {
-		return err
-	}
-	if _, err := jsonDb.Seek(0, 0); err != nil {
-		return err
-	}
-
-	_, err = jsonDb.Write(newUsers)
-	if err != nil {
-		return err
-	}
-
-	return nil
-
-	return nil
+	return repo.writeUsers(users)
 }
 
 func (repo *JSONUserRepo) Deactivate(userID int) error {
-	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR, 0666)
-	if err != nil {
-		return err
-	}
-
-	defer func(jsonDb *os.File) {
-		err := jsonDb.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(jsonDb)
-
 	users, err := repo.GetAll()
 	if err != nil {
 		return err
@@ -220,24 +141,7 @@ func (repo *JSONUserRepo) Deactivate(userID int) error {
 
 	users[userID].Status = false
 
-	newUsers, err := json.MarshalIndent(users, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	if err = jsonDb.Truncate(0); err != nil {
-		return err
-	}
-	if _, err := jsonDb.Seek(0, 0); err != nil {
-		return err
-	}
-
-	_, err = jsonDb.Write(newUsers)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return repo.writeUsers(users)
 }
 
 func (repo *JSONUserRepo) SetActive(userID int) error {
