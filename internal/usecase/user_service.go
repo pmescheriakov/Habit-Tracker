@@ -23,6 +23,23 @@ func printUsers(users []domain.User) {
 	}
 }
 
+func InactiveUsers(repo domain.UserRepository) {
+	users, err := repo.GetAll()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	activeUsers := make([]domain.User, 0)
+	for _, user := range users {
+		if !user.Status {
+			activeUsers = append(activeUsers, user)
+		}
+	}
+
+	printUsers(activeUsers)
+}
+
 func ActiveUsers(repo domain.UserRepository) {
 	users, err := repo.GetAll()
 	if err != nil {
@@ -40,7 +57,7 @@ func ActiveUsers(repo domain.UserRepository) {
 	printUsers(activeUsers)
 }
 
-func Users(repo domain.UserRepository) {
+func AllUsers(repo domain.UserRepository) {
 	users, err := repo.GetAll()
 	if err != nil {
 		fmt.Println(err)
@@ -59,8 +76,9 @@ func AddUser(repo domain.UserRepository, args []string) {
 		fmt.Println("No <name> provided")
 		return
 	}
-	if len(args) > 1 {
+	if len(args) > 2 {
 		fmt.Println("Too many arguments")
+		return
 	}
 
 	users, err := repo.GetAll()
@@ -80,8 +98,6 @@ func AddUser(repo domain.UserRepository, args []string) {
 	} else if user != nil {
 		fmt.Println("User already exists and inactive")
 	} else {
-		fmt.Println("User not exists")
-
 		user = &domain.User{Id: len(users), Login: args[0], Name: args[1], Status: true}
 
 		err = repo.Save(*user)
@@ -90,7 +106,8 @@ func AddUser(repo domain.UserRepository, args []string) {
 			return
 		}
 
-		fmt.Printf("User added! Id: %v, Login: %v, Name: %v\n", user.Id, user.Login, user.Name)
+		fmt.Println("User added!")
+		printUsers(append([]domain.User{}, *user))
 	}
 }
 
@@ -129,10 +146,11 @@ func ActivateUser(repo domain.UserRepository, args []string) {
 		return
 	}
 
-	fmt.Printf("User activated! Id: %v, Login: %v, Name: %v\n", user.Id, user.Login, user.Name)
+	fmt.Println("User activated!")
+	printUsers(append([]domain.User{}, *user))
 }
 
-func DeactUser(repo domain.UserRepository, args []string) {
+func DeactivateUser(repo domain.UserRepository, args []string) {
 	if len(args) == 0 {
 		fmt.Println("No user <id> provided")
 		return
@@ -167,7 +185,8 @@ func DeactUser(repo domain.UserRepository, args []string) {
 		return
 	}
 
-	fmt.Printf("User deactivated! Id: %v, Login: %v, Name: %v\n", user.Id, user.Login, user.Name)
+	fmt.Println("User deactivated!")
+	printUsers(append([]domain.User{}, *user))
 }
 
 func UpdateUser(repo domain.UserRepository, args []string) {
@@ -218,13 +237,61 @@ func UpdateUser(repo domain.UserRepository, args []string) {
 		return
 	}
 
-	fmt.Printf("User updated! Id: %v, Login: %v, Name: %v\n", user.Id, user.Login, user.Name)
+	fmt.Println("User updated!")
+	printUsers(append([]domain.User{}, *user))
+}
+
+func CurrentUser(repo domain.UserRepository) {
+	user, err := repo.GetActive()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println("Active User Info")
+	printUsers(append([]domain.User{}, *user))
 }
 
 func SwitchUser(repo domain.UserRepository, args []string) {
+	if len(args) == 0 {
+		fmt.Println("No new active user <id> provided")
+		return
+	}
+	if len(args) > 1 {
+		fmt.Println("Too many arguments")
+	}
 
+	userId, err := strconv.Atoi(args[0])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	user, err := repo.FindId(userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if user == nil {
+		fmt.Println("User not found")
+		return
+	}
+
+	err = repo.SetActive(user.Id)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println("User updated!")
+	printUsers(append([]domain.User{}, *user))
+
+	CurrentUser(repo)
 }
 
 func InfoUser(repo domain.UserRepository, args []string) {
+
+}
+
+func InfoAllActiveUsers(repo domain.UserRepository, args []string) {
 
 }

@@ -26,7 +26,7 @@ import (
 //	- undone: unmark today-done habit to user
 func main() {
 	args := os.Args[1:]
-	repo := db.NewJSONUserRepo("data/users.json")
+	repo := db.NewJSONUserRepo("data/users.json", "data/active_user.json")
 
 	if len(args) == 0 {
 		fmt.Println("No args! --> Use just <help> entity-arg to see all possible entities!")

@@ -2,6 +2,7 @@ package db
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,11 +11,12 @@ import (
 )
 
 type JSONUserRepo struct {
-	filePath string
+	filePath   string
+	activePath string
 }
 
-func NewJSONUserRepo(path string) *JSONUserRepo {
-	return &JSONUserRepo{filePath: path}
+func NewJSONUserRepo(filePath, activePath string) *JSONUserRepo {
+	return &JSONUserRepo{filePath: filePath, activePath: activePath}
 }
 
 func (repo *JSONUserRepo) writeUsers(users []domain.User) error {
@@ -145,9 +147,79 @@ func (repo *JSONUserRepo) Deactivate(userID int) error {
 }
 
 func (repo *JSONUserRepo) SetActive(userID int) error {
+	jsonDb, err := os.OpenFile(repo.activePath, os.O_RDWR, 0666)
+	if err != nil {
+		return err
+	}
+	defer func(jsonDb *os.File) {
+		err := jsonDb.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(jsonDb)
+
+	userActive := struct {
+		ActiveUserId int `json:"activeUserId"`
+	}{
+		ActiveUserId: userID,
+	}
+
+	data, err := json.MarshalIndent(userActive, "", "  ")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if _, err := jsonDb.Write(data); err != nil {
+		fmt.Println(err)
+	}
+
 	return nil
 }
 
 func (repo *JSONUserRepo) GetActive() (*domain.User, error) {
-	return nil, nil
+	jsonDb, err := os.OpenFile(repo.activePath, os.O_RDWR, 0666)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	defer func(jsonDb *os.File) {
+		err := jsonDb.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(jsonDb)
+
+	bytes, err := io.ReadAll(jsonDb)
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := repo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	if len(users) == 0 {
+		return &domain.User{}, errors.New("no users exists")
+	}
+
+	var userActive struct {
+		ActiveUserId int `json:"activeUserId"`
+	}
+
+	err = json.Unmarshal(bytes, &userActive)
+	if err != nil {
+		// if no active user -> set 0
+		userActive.ActiveUserId = 0
+
+		data, err := json.MarshalIndent(userActive, "", "  ")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		if _, err := jsonDb.Write(data); err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	return &users[userActive.ActiveUserId], nil
 }

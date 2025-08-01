@@ -11,20 +11,26 @@ func HandleUser(repo domain.UserRepository, args []string) {
 	switch args[0] {
 	case "active_users":
 		usecase.ActiveUsers(repo)
-	case "users":
-		usecase.Users(repo)
+	case "inactive_users":
+		usecase.InactiveUsers(repo)
+	case "all_users":
+		usecase.AllUsers(repo)
 	case "add":
 		usecase.AddUser(repo, args[1:])
 	case "activate":
 		usecase.ActivateUser(repo, args[1:])
-	case "deact":
-		usecase.DeactUser(repo, args[1:])
+	case "deactivate":
+		usecase.DeactivateUser(repo, args[1:])
 	case "update":
 		usecase.UpdateUser(repo, args[1:])
+	case "current":
+		usecase.CurrentUser(repo)
 	case "switch":
 		usecase.SwitchUser(repo, args[1:])
 	case "info":
 		usecase.InfoUser(repo, args[1:])
+	case "all_info":
+		usecase.InfoAllActiveUsers(repo, args[1:])
 	default:
 		fmt.Println("Wrong command! --> Use just <help> entity-arg to see all possible commands!")
 	}
