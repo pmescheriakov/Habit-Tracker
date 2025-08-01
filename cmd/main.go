@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/pmescheriakov/Habit-Tracker/internal/infra/db"
 	"github.com/pmescheriakov/Habit-Tracker/internal/interface/cli"
 )
 
@@ -25,19 +26,22 @@ import (
 //	- undone: unmark today-done habit to user
 func main() {
 	args := os.Args[1:]
+	repo := db.NewJSONUserRepo("data/users.json")
+
 	if len(args) == 0 {
 		fmt.Println("No args! --> Use just <help> entity-arg to see all possible entities!")
+		return
 	}
 
 	switch args[0] {
 	case "user":
 		entityArgs := make([]string, len(args[1:]))
 		copy(entityArgs, args[1:])
-		cli.HandleUser(entityArgs)
+		cli.HandleUser(repo, entityArgs)
 	case "habit":
 		entityArgs := make([]string, len(args[1:]))
 		copy(entityArgs, args[1:])
-		cli.HandleHabit(entityArgs)
+		cli.HandleHabit(repo, entityArgs)
 	case "help":
 		cli.HandleHelp()
 	default:

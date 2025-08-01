@@ -1,7 +1,8 @@
 package domain
 
 type User struct {
-	Id    int
-	Login string
-	Name  string
+	Id     int    `json:"Id"`
+	Login  string `json:"Login"`
+	Name   string `json:"Name"`
+	Status bool   `json:"Status"`
 }

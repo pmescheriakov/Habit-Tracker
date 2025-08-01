@@ -2,29 +2,31 @@ package cli
 
 import (
 	"fmt"
+
+	"github.com/pmescheriakov/Habit-Tracker/internal/domain"
 	"github.com/pmescheriakov/Habit-Tracker/internal/usecase"
 )
 
-func HandleUser(args []string) {
+func HandleUser(repo domain.UserRepository, args []string) {
 	switch args[0] {
 	case "users":
-		usecase.Users()
+		usecase.Users(repo)
 	case "add":
-		usecase.AddUser(args[1:])
+		usecase.AddUser(repo, args[1:])
 	case "deact":
-		usecase.DeactUser(args[1:])
+		usecase.DeactUser(repo, args[1:])
 	case "change":
-		usecase.ChangeUser(args[1:])
+		usecase.ChangeUser(repo, args[1:])
 	case "switch":
-		usecase.SwitchUser(args[1:])
+		usecase.SwitchUser(repo, args[1:])
 	case "info":
-		usecase.InfoUser(args[1:])
+		usecase.InfoUser(repo, args[1:])
 	default:
 		fmt.Println("Wrong command! --> Use just <help> entity-arg to see all possible commands!")
 	}
 }
 
-func HandleHabit(args []string) {
+func HandleHabit(repo domain.UserRepository, args []string) {
 	switch args[0] {
 	case "add":
 		usecase.AddHabit(args[1:])
