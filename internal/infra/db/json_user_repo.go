@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/pmescheriakov/Habit-Tracker/internal/domain"
 )
@@ -15,8 +16,18 @@ type JSONUserRepo struct {
 	activePath string
 }
 
-func NewJSONUserRepo(filePath, activePath string) *JSONUserRepo {
-	return &JSONUserRepo{filePath: filePath, activePath: activePath}
+func NewJSONUserRepo(usersPath, activeUserPath string) *JSONUserRepo {
+	_ = os.MkdirAll(filepath.Dir(usersPath), 0755)
+	_ = os.MkdirAll(filepath.Dir(activeUserPath), 0755)
+
+	if _, err := os.Stat(usersPath); os.IsNotExist(err) {
+		_ = os.WriteFile(usersPath, []byte("[]"), 0644)
+	}
+	if _, err := os.Stat(activeUserPath); os.IsNotExist(err) {
+		_ = os.WriteFile(activeUserPath, []byte(`{"activeUserId": 0}`), 0644)
+	}
+
+	return &JSONUserRepo{filePath: usersPath, activePath: activeUserPath}
 }
 
 func (repo *JSONUserRepo) writeUsers(users []domain.User) error {
@@ -43,7 +54,7 @@ func (repo *JSONUserRepo) writeUsers(users []domain.User) error {
 }
 
 func (repo *JSONUserRepo) GetAll() ([]domain.User, error) {
-	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR, 0666)
+	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDONLY, 0666)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -114,6 +125,14 @@ func (repo *JSONUserRepo) Save(user domain.User) error {
 }
 
 func (repo *JSONUserRepo) Update(user domain.User) error {
+	u, err := repo.FindId(user.Id)
+	if err != nil {
+		return err
+	}
+	if u == nil {
+		return errors.New("user not found")
+	}
+
 	users, err := repo.GetAll()
 	if err != nil {
 		return err
@@ -130,6 +149,14 @@ func (repo *JSONUserRepo) Activate(userID int) error {
 		return err
 	}
 
+	checkUser, err := repo.FindId(userID)
+	if err != nil {
+		return err
+	}
+	if checkUser == nil {
+		return errors.New("user not found")
+	}
+
 	users[userID].Status = true
 
 	return repo.writeUsers(users)
@@ -141,13 +168,21 @@ func (repo *JSONUserRepo) Deactivate(userID int) error {
 		return err
 	}
 
+	checkUser, err := repo.FindId(userID)
+	if err != nil {
+		return err
+	}
+	if checkUser == nil {
+		return errors.New("user not found")
+	}
+
 	users[userID].Status = false
 
 	return repo.writeUsers(users)
 }
 
 func (repo *JSONUserRepo) SetActive(userID int) error {
-	jsonDb, err := os.OpenFile(repo.activePath, os.O_RDWR, 0666)
+	jsonDb, err := os.OpenFile(repo.activePath, os.O_RDWR|os.O_TRUNC, 0666)
 	if err != nil {
 		return err
 	}
@@ -157,6 +192,14 @@ func (repo *JSONUserRepo) SetActive(userID int) error {
 			fmt.Println(err)
 		}
 	}(jsonDb)
+
+	checkUser, err := repo.FindId(userID)
+	if err != nil {
+		return err
+	}
+	if checkUser == nil {
+		return errors.New("user not found")
+	}
 
 	userActive := struct {
 		ActiveUserId int `json:"activeUserId"`
@@ -177,7 +220,7 @@ func (repo *JSONUserRepo) SetActive(userID int) error {
 }
 
 func (repo *JSONUserRepo) GetActive() (*domain.User, error) {
-	jsonDb, err := os.OpenFile(repo.activePath, os.O_RDWR, 0666)
+	jsonDb, err := os.OpenFile(repo.activePath, os.O_RDONLY, 0666)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -199,7 +242,7 @@ func (repo *JSONUserRepo) GetActive() (*domain.User, error) {
 		return nil, err
 	}
 	if len(users) == 0 {
-		return &domain.User{}, errors.New("no users exists")
+		return nil, errors.New("no users exists")
 	}
 
 	var userActive struct {

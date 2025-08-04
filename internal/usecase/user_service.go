@@ -98,7 +98,15 @@ func AddUser(repo domain.UserRepository, args []string) {
 	} else if user != nil {
 		fmt.Println("User already exists and inactive")
 	} else {
-		user = &domain.User{Id: len(users), Login: args[0], Name: args[1], Status: true}
+		maxId := -1
+
+		for _, user := range users {
+			if user.Id > maxId {
+				maxId = user.Id
+			}
+		}
+
+		user = &domain.User{Id: maxId + 1, Login: args[0], Name: args[1], Status: true}
 
 		err = repo.Save(*user)
 		if err != nil {
