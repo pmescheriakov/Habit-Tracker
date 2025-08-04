@@ -56,7 +56,6 @@ func (repo *JSONUserRepo) writeUsers(users []domain.User) error {
 func (repo *JSONUserRepo) GetAll() ([]domain.User, error) {
 	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDONLY, 0666)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	defer func(jsonDb *os.File) {
@@ -209,20 +208,19 @@ func (repo *JSONUserRepo) SetActive(userID int) error {
 
 	data, err := json.MarshalIndent(userActive, "", "  ")
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	if _, err := jsonDb.Write(data); err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	return nil
 }
 
 func (repo *JSONUserRepo) GetActive() (*domain.User, error) {
-	jsonDb, err := os.OpenFile(repo.activePath, os.O_RDONLY, 0666)
+	jsonDb, err := os.OpenFile(repo.activePath, os.O_RDWR, 0666)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	defer func(jsonDb *os.File) {
@@ -256,11 +254,11 @@ func (repo *JSONUserRepo) GetActive() (*domain.User, error) {
 
 		data, err := json.MarshalIndent(userActive, "", "  ")
 		if err != nil {
-			fmt.Println(err)
+			return nil, err
 		}
 
 		if _, err := jsonDb.Write(data); err != nil {
-			fmt.Println(err)
+			return nil, err
 		}
 	}
 

@@ -23,7 +23,7 @@ func setupTestRepo(t *testing.T) (domain.UserRepository, string, string) {
 	err := os.WriteFile(usersPath, []byte("[]"), 0644)
 	require.NoError(t, err)
 
-	err = os.WriteFile(activePath, []byte(`{"activeUserId":0}`), 0644)
+	err = os.WriteFile(activePath, []byte("[]"), 0644)
 	require.NoError(t, err)
 
 	return db.NewJSONUserRepo(usersPath, activePath), usersPath, activePath

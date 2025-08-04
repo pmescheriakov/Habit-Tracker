@@ -7,30 +7,89 @@ import (
 	"github.com/pmescheriakov/Habit-Tracker/internal/usecase"
 )
 
+func printUsers(users []domain.User, title string) {
+	if len(users) == 0 {
+		fmt.Println("No users found")
+		return
+	}
+
+	for _, user := range users {
+		status := "inactive"
+		if user.Status {
+			status = "active"
+		}
+
+		fmt.Println(title)
+		fmt.Printf("ID: %d | Login: %s | Name: %s | Status: %s\n", user.Id, user.Login, user.Name, status)
+	}
+}
+
 func HandleUser(repo domain.UserRepository, args []string) {
 	switch args[0] {
 	case "active_users":
-		usecase.ActiveUsers(repo)
+		users, err := usecase.ActiveUsers(repo)
+		if err != nil {
+			fmt.Println(err)
+		}
+		printUsers(users, "== ALL ACTIVE USERS ==")
 	case "inactive_users":
-		usecase.InactiveUsers(repo)
+		users, err := usecase.InactiveUsers(repo)
+		if err != nil {
+			fmt.Println(err)
+		}
+		printUsers(users, "== ALL INACTIVE USERS ==")
 	case "all_users":
-		usecase.AllUsers(repo)
+		users, err := usecase.AllUsers(repo)
+		if err != nil {
+			fmt.Println(err)
+		}
+		printUsers(users, "== ALL USERS ==")
 	case "add":
-		usecase.AddUser(repo, args[1:])
+		users, err := usecase.AddUser(repo, args[1:])
+		if err != nil {
+			fmt.Println(err)
+		}
+		printUsers(users, "== ADD SUCCESS, NEW USER ==")
 	case "activate":
-		usecase.ActivateUser(repo, args[1:])
+		users, err := usecase.ActivateUser(repo, args[1:])
+		if err != nil {
+			fmt.Println(err)
+		}
+		printUsers(users, "== ACTIVATE SUCCESS, ACTIVATED USER ==")
 	case "deactivate":
-		usecase.DeactivateUser(repo, args[1:])
+		users, err := usecase.DeactivateUser(repo, args[1:])
+		if err != nil {
+			fmt.Println(err)
+		}
+		printUsers(users, "== DEACTIVATE SUCCESS, DEACTIVATED USER ==")
 	case "update":
-		usecase.UpdateUser(repo, args[1:])
+		users, err := usecase.UpdateUser(repo, args[1:])
+		if err != nil {
+			fmt.Println(err)
+		}
+		printUsers(users, "== UPDATE SUCCESS, UPDATED USER ==")
 	case "current":
-		usecase.CurrentUser(repo)
+		users, err := usecase.CurrentUser(repo)
+		if err != nil {
+			fmt.Println(err)
+		}
+		printUsers(users, "== CURRENT USER ==")
 	case "switch":
-		usecase.SwitchUser(repo, args[1:])
+		users, err := usecase.SwitchUser(repo, args[1:])
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		users, err = usecase.CurrentUser(repo)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		printUsers(users, "== CURRENT USER ==")
 	case "info":
-		usecase.InfoUser(repo, args[1:])
+		// TODO: usecase.InfoUser(repo, args[1:])
 	case "all_info":
-		usecase.InfoAllActiveUsers(repo, args[1:])
+		// TODO: usecase.InfoAllActiveUsers(repo, args[1:])
 	default:
 		fmt.Println("Wrong command! --> Use just <help> entity-arg to see all possible commands!")
 	}
