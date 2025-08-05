@@ -2,7 +2,6 @@ package db
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -24,7 +23,7 @@ func NewJSONUserRepo(usersPath, activeUserPath string) *JSONUserRepo {
 		_ = os.WriteFile(usersPath, []byte("[]"), 0644)
 	}
 	if _, err := os.Stat(activeUserPath); os.IsNotExist(err) {
-		_ = os.WriteFile(activeUserPath, []byte(`{"activeUserId": 0}`), 0644)
+		_ = os.WriteFile(activeUserPath, []byte("[]"), 0644)
 	}
 
 	return &JSONUserRepo{filePath: usersPath, activePath: activeUserPath}
@@ -94,7 +93,7 @@ func (repo *JSONUserRepo) FindLogName(login, name string) (*domain.User, error) 
 		}
 	}
 
-	return nil, nil
+	return nil, domain.ErrUserNotFound
 }
 
 func (repo *JSONUserRepo) FindId(id int) (*domain.User, error) {
@@ -109,7 +108,7 @@ func (repo *JSONUserRepo) FindId(id int) (*domain.User, error) {
 		}
 	}
 
-	return nil, nil
+	return nil, domain.ErrUserNotFound
 }
 
 func (repo *JSONUserRepo) Save(user domain.User) error {
@@ -129,7 +128,7 @@ func (repo *JSONUserRepo) Update(user domain.User) error {
 		return err
 	}
 	if u == nil {
-		return errors.New("user not found")
+		return domain.ErrUserNotFound
 	}
 
 	users, err := repo.GetAll()
@@ -153,7 +152,7 @@ func (repo *JSONUserRepo) Activate(userID int) error {
 		return err
 	}
 	if checkUser == nil {
-		return errors.New("user not found")
+		return domain.ErrUserNotFound
 	}
 
 	users[userID].Status = true
@@ -172,7 +171,7 @@ func (repo *JSONUserRepo) Deactivate(userID int) error {
 		return err
 	}
 	if checkUser == nil {
-		return errors.New("user not found")
+		return domain.ErrUserNotFound
 	}
 
 	users[userID].Status = false
@@ -197,7 +196,7 @@ func (repo *JSONUserRepo) SetActive(userID int) error {
 		return err
 	}
 	if checkUser == nil {
-		return errors.New("user not found")
+		return domain.ErrUserNotFound
 	}
 
 	userActive := struct {
@@ -240,7 +239,7 @@ func (repo *JSONUserRepo) GetActive() (*domain.User, error) {
 		return nil, err
 	}
 	if len(users) == 0 {
-		return nil, errors.New("no users exists")
+		return nil, domain.ErrNoUsers
 	}
 
 	var userActive struct {

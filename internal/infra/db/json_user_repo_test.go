@@ -74,8 +74,8 @@ func TestFindLogName(t *testing.T) {
 
 	// empty file
 	pUser, err := repo.FindLogName("test0", "TestUser0")
-	require.NoError(t, err)
-	require.Nil(t, pUser)
+	require.Equal(t, domain.ErrUserNotFound, err)
+	assert.Nil(t, pUser)
 
 	// no empty file
 	user0 := domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: true}
@@ -95,8 +95,8 @@ func TestFindLogName(t *testing.T) {
 
 	// unsuccess find
 	pUser, err = repo.FindLogName("test3", "TestUser3")
-	require.NoError(t, err)
-	require.Nil(t, pUser)
+	require.Equal(t, domain.ErrUserNotFound, err)
+	assert.Nil(t, pUser)
 }
 
 func TestFindId(t *testing.T) {
@@ -104,8 +104,8 @@ func TestFindId(t *testing.T) {
 
 	// empty file
 	pUser, err := repo.FindId(0)
-	require.NoError(t, err)
-	require.Nil(t, pUser)
+	require.Equal(t, domain.ErrUserNotFound, err)
+	assert.Nil(t, pUser)
 
 	// no empty file
 	user0 := domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: true}
@@ -125,8 +125,8 @@ func TestFindId(t *testing.T) {
 
 	// unsuccess find
 	pUser, err = repo.FindId(2)
-	require.NoError(t, err)
-	require.Nil(t, pUser)
+	require.Equal(t, domain.ErrUserNotFound, err)
+	assert.Nil(t, pUser)
 }
 
 func TestSave(t *testing.T) {
@@ -153,7 +153,7 @@ func TestUpdate(t *testing.T) {
 
 	user0 := domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: true}
 	err = repo.Update(user0)
-	require.EqualError(t, err, "user not found")
+	require.Equal(t, domain.ErrUserNotFound, err)
 
 	usersNew, err := repo.GetAll()
 	require.NoError(t, err)
@@ -181,11 +181,11 @@ func TestUpdate(t *testing.T) {
 	// unsuccess update
 	user3Upd := domain.User{Id: 3, Login: "test33", Name: "TestUser3333", Status: true}
 	err = repo.Update(user3Upd)
-	require.EqualError(t, err, "user not found")
+	require.Equal(t, domain.ErrUserNotFound, err)
 
 	pUser, err = repo.FindId(user3Upd.Id)
-	require.NoError(t, err)
-	require.Nil(t, pUser)
+	require.Equal(t, domain.ErrUserNotFound, err)
+	assert.Nil(t, pUser)
 }
 
 func TestActivate(t *testing.T) {
@@ -193,7 +193,7 @@ func TestActivate(t *testing.T) {
 
 	// no user
 	err := repo.Activate(1)
-	require.EqualError(t, err, "user not found")
+	require.Equal(t, domain.ErrUserNotFound, err)
 
 	// user exists
 	user0 := domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: true}
@@ -217,7 +217,7 @@ func TestDeactivate(t *testing.T) {
 
 	// no user
 	err := repo.Deactivate(1)
-	require.EqualError(t, err, "user not found")
+	require.Equal(t, domain.ErrUserNotFound, err)
 
 	// user exists
 	user0 := domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: true}
@@ -241,7 +241,7 @@ func TestSetActive(t *testing.T) {
 
 	// no user
 	err := repo.SetActive(1)
-	require.EqualError(t, err, "user not found")
+	require.Equal(t, domain.ErrUserNotFound, err)
 
 	// user exists
 	user0 := domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: true}
@@ -266,8 +266,8 @@ func TestGetActive(t *testing.T) {
 
 	// empty active file
 	pUser, err := repo.GetActive()
-	require.EqualError(t, err, "no users exists")
-	require.Nil(t, pUser)
+	require.Equal(t, domain.ErrNoUsers, err)
+	assert.Nil(t, pUser)
 
 	// users exists
 	repo, _, _ = setupTestRepo(t)

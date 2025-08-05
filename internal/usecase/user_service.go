@@ -50,13 +50,13 @@ func AllUsers(repo domain.UserRepository) ([]domain.User, error) {
 
 func AddUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
 	if len(args) == 0 {
-		return nil, errors.New("no <login> <name> provided")
+		return nil, domain.ErrMissingLoginAndName
 	}
 	if len(args) == 1 {
-		return nil, errors.New("no <login> <name> provided")
+		return nil, domain.ErrMissingName
 	}
 	if len(args) > 2 {
-		return nil, errors.New("too many arguments")
+		return nil, domain.ErrTooManyArguments
 	}
 
 	users, err := repo.GetAll()
@@ -65,14 +65,14 @@ func AddUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
 	}
 
 	user, err := repo.FindLogName(args[0], args[1])
-	if err != nil {
+	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
 		return nil, err
 	}
 
 	if user != nil && user.Status == true {
-		return nil, errors.New("user already exists and active")
+		return nil, domain.ErrUserExistsActive
 	} else if user != nil {
-		return nil, errors.New("user already exists and inactive")
+		return nil, domain.ErrUserExistsInactive
 	} else {
 		maxId := -1
 
@@ -95,10 +95,10 @@ func AddUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
 
 func ActivateUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
 	if len(args) == 0 {
-		return nil, errors.New("no user <id> provided")
+		return nil, domain.ErrMissingID
 	}
 	if len(args) > 1 {
-		return nil, errors.New("too many arguments")
+		return nil, domain.ErrTooManyArguments
 	}
 
 	userId, err := strconv.Atoi(args[0])
@@ -111,13 +111,18 @@ func ActivateUser(repo domain.UserRepository, args []string) ([]domain.User, err
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.New("user not found")
+		return nil, domain.ErrUserNotFound
 	}
 	if user.Status == true {
-		return nil, errors.New("user already active")
+		return append([]domain.User{}, *user), domain.ErrUserAlreadyActive
 	}
 
 	err = repo.Activate(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err = repo.FindId(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -127,10 +132,10 @@ func ActivateUser(repo domain.UserRepository, args []string) ([]domain.User, err
 
 func DeactivateUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
 	if len(args) == 0 {
-		return nil, errors.New("no user <id> provided")
+		return nil, domain.ErrMissingID
 	}
 	if len(args) > 1 {
-		return nil, errors.New("too many arguments")
+		return nil, domain.ErrTooManyArguments
 	}
 
 	userId, err := strconv.Atoi(args[0])
@@ -143,13 +148,18 @@ func DeactivateUser(repo domain.UserRepository, args []string) ([]domain.User, e
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.New("user not found")
+		return nil, domain.ErrUserNotFound
 	}
 	if user.Status != true {
-		return nil, errors.New("user already inactive")
+		return nil, domain.ErrUserAlreadyInactive
 	}
 
 	err = repo.Deactivate(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err = repo.FindId(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -159,16 +169,16 @@ func DeactivateUser(repo domain.UserRepository, args []string) ([]domain.User, e
 
 func UpdateUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
 	if len(args) == 0 {
-		return nil, errors.New("no user <id>, new <login>, new <name> provided")
+		return nil, domain.ErrMissingNewUserFields
 	}
 	if len(args) == 1 {
-		return nil, errors.New("no user new <login>, new <name> provided")
+		return nil, domain.ErrMissingNewLoginName
 	}
 	if len(args) == 2 {
-		return nil, errors.New("no user new <name> provided")
+		return nil, domain.ErrMissingNewName
 	}
 	if len(args) > 3 {
-		return nil, errors.New("too many arguments")
+		return nil, domain.ErrTooManyArguments
 	}
 
 	userId, err := strconv.Atoi(args[0])
@@ -181,17 +191,17 @@ func UpdateUser(repo domain.UserRepository, args []string) ([]domain.User, error
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.New("user not found")
+		return nil, domain.ErrUserNotFound
 	}
 	if user.Status != true {
-		return nil, errors.New("user status is inactive")
+		return nil, domain.ErrUserStatusInactive
 	}
-	if user.Name == args[1] && user.Login == args[2] {
-		return nil, errors.New("nothing to change")
+	if user.Login == args[1] && user.Name == args[2] {
+		return nil, domain.ErrNothingToChange
 	}
 
-	user.Name = args[1]
-	user.Login = args[2]
+	user.Login = args[1]
+	user.Name = args[2]
 
 	err = repo.Update(*user)
 	if err != nil {
@@ -212,10 +222,10 @@ func CurrentUser(repo domain.UserRepository) ([]domain.User, error) {
 
 func SwitchUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
 	if len(args) == 0 {
-		return nil, errors.New("no new active user <id> provided")
+		return nil, domain.ErrMissingActiveUserID
 	}
 	if len(args) > 1 {
-		return nil, errors.New("too many arguments")
+		return nil, domain.ErrTooManyArguments
 	}
 
 	userId, err := strconv.Atoi(args[0])
@@ -228,7 +238,7 @@ func SwitchUser(repo domain.UserRepository, args []string) ([]domain.User, error
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.New("user not found")
+		return nil, domain.ErrUserNotFound
 	}
 
 	err = repo.SetActive(user.Id)
