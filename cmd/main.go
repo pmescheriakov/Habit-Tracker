@@ -26,7 +26,8 @@ import (
 //	- undone: unmark today-done habit to user
 func main() {
 	args := os.Args[1:]
-	repo := db.NewJSONUserRepo("data/users.json", "data/active_user.json")
+	userRepo := db.NewJSONUserRepo("data/users.json", "data/active_user.json")
+	habitRepo := db.NewJSONHabitRepo("data/habits.json")
 
 	if len(args) == 0 {
 		fmt.Println("No args! --> Use just <help> entity-arg to see all possible entities!")
@@ -37,11 +38,11 @@ func main() {
 	case "user":
 		entityArgs := make([]string, len(args[1:]))
 		copy(entityArgs, args[1:])
-		cli.HandleUser(repo, entityArgs)
+		cli.HandleUser(userRepo, entityArgs)
 	case "habit":
 		entityArgs := make([]string, len(args[1:]))
 		copy(entityArgs, args[1:])
-		cli.HandleHabit(repo, entityArgs)
+		cli.HandleHabit(habitRepo, userRepo, entityArgs)
 	case "help":
 		cli.HandleHelp()
 	default:

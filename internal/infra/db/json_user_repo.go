@@ -29,8 +29,8 @@ func NewJSONUserRepo(usersPath, activeUserPath string) *JSONUserRepo {
 	return &JSONUserRepo{filePath: usersPath, activePath: activeUserPath}
 }
 
-func (repo *JSONUserRepo) writeUsers(users []domain.User) error {
-	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDWR|os.O_TRUNC, 0666)
+func (usersRepo *JSONUserRepo) writeUsers(users []domain.User) error {
+	jsonDb, err := os.OpenFile(usersRepo.filePath, os.O_RDWR|os.O_TRUNC, 0666)
 	if err != nil {
 		return err
 	}
@@ -52,8 +52,8 @@ func (repo *JSONUserRepo) writeUsers(users []domain.User) error {
 	return nil
 }
 
-func (repo *JSONUserRepo) GetAll() ([]domain.User, error) {
-	jsonDb, err := os.OpenFile(repo.filePath, os.O_RDONLY, 0666)
+func (usersRepo *JSONUserRepo) GetAll() ([]domain.User, error) {
+	jsonDb, err := os.OpenFile(usersRepo.filePath, os.O_RDONLY, 0666)
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +81,8 @@ func (repo *JSONUserRepo) GetAll() ([]domain.User, error) {
 	return users, nil
 }
 
-func (repo *JSONUserRepo) FindLogName(login, name string) (*domain.User, error) {
-	users, err := repo.GetAll()
+func (usersRepo *JSONUserRepo) FindLogName(login, name string) (*domain.User, error) {
+	users, err := usersRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -96,8 +96,8 @@ func (repo *JSONUserRepo) FindLogName(login, name string) (*domain.User, error) 
 	return nil, domain.ErrUserNotFound
 }
 
-func (repo *JSONUserRepo) FindId(id int) (*domain.User, error) {
-	users, err := repo.GetAll()
+func (usersRepo *JSONUserRepo) FindId(id int) (*domain.User, error) {
+	users, err := usersRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -111,19 +111,19 @@ func (repo *JSONUserRepo) FindId(id int) (*domain.User, error) {
 	return nil, domain.ErrUserNotFound
 }
 
-func (repo *JSONUserRepo) Save(user domain.User) error {
-	users, err := repo.GetAll()
+func (usersRepo *JSONUserRepo) Save(user domain.User) error {
+	users, err := usersRepo.GetAll()
 	if err != nil {
 		return err
 	}
 
 	users = append(users, user)
 
-	return repo.writeUsers(users)
+	return usersRepo.writeUsers(users)
 }
 
-func (repo *JSONUserRepo) Update(user domain.User) error {
-	u, err := repo.FindId(user.Id)
+func (usersRepo *JSONUserRepo) Update(user domain.User) error {
+	u, err := usersRepo.FindId(user.Id)
 	if err != nil {
 		return err
 	}
@@ -131,23 +131,23 @@ func (repo *JSONUserRepo) Update(user domain.User) error {
 		return domain.ErrUserNotFound
 	}
 
-	users, err := repo.GetAll()
+	users, err := usersRepo.GetAll()
 	if err != nil {
 		return err
 	}
 
 	users[user.Id] = user
 
-	return repo.writeUsers(users)
+	return usersRepo.writeUsers(users)
 }
 
-func (repo *JSONUserRepo) Activate(userID int) error {
-	users, err := repo.GetAll()
+func (usersRepo *JSONUserRepo) Activate(userID int) error {
+	users, err := usersRepo.GetAll()
 	if err != nil {
 		return err
 	}
 
-	checkUser, err := repo.FindId(userID)
+	checkUser, err := usersRepo.FindId(userID)
 	if err != nil {
 		return err
 	}
@@ -157,16 +157,16 @@ func (repo *JSONUserRepo) Activate(userID int) error {
 
 	users[userID].Status = true
 
-	return repo.writeUsers(users)
+	return usersRepo.writeUsers(users)
 }
 
-func (repo *JSONUserRepo) Deactivate(userID int) error {
-	users, err := repo.GetAll()
+func (usersRepo *JSONUserRepo) Deactivate(userID int) error {
+	users, err := usersRepo.GetAll()
 	if err != nil {
 		return err
 	}
 
-	checkUser, err := repo.FindId(userID)
+	checkUser, err := usersRepo.FindId(userID)
 	if err != nil {
 		return err
 	}
@@ -176,11 +176,11 @@ func (repo *JSONUserRepo) Deactivate(userID int) error {
 
 	users[userID].Status = false
 
-	return repo.writeUsers(users)
+	return usersRepo.writeUsers(users)
 }
 
-func (repo *JSONUserRepo) SetActive(userID int) error {
-	jsonDb, err := os.OpenFile(repo.activePath, os.O_RDWR|os.O_TRUNC, 0666)
+func (usersRepo *JSONUserRepo) SetActive(userID int) error {
+	jsonDb, err := os.OpenFile(usersRepo.activePath, os.O_RDWR|os.O_TRUNC, 0666)
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func (repo *JSONUserRepo) SetActive(userID int) error {
 		}
 	}(jsonDb)
 
-	checkUser, err := repo.FindId(userID)
+	checkUser, err := usersRepo.FindId(userID)
 	if err != nil {
 		return err
 	}
@@ -217,8 +217,8 @@ func (repo *JSONUserRepo) SetActive(userID int) error {
 	return nil
 }
 
-func (repo *JSONUserRepo) GetActive() (*domain.User, error) {
-	jsonDb, err := os.OpenFile(repo.activePath, os.O_RDWR, 0666)
+func (usersRepo *JSONUserRepo) GetActive() (*domain.User, error) {
+	jsonDb, err := os.OpenFile(usersRepo.activePath, os.O_RDWR, 0666)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (repo *JSONUserRepo) GetActive() (*domain.User, error) {
 		return nil, err
 	}
 
-	users, err := repo.GetAll()
+	users, err := usersRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}

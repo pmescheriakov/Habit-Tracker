@@ -7,8 +7,8 @@ import (
 	"github.com/pmescheriakov/Habit-Tracker/internal/domain"
 )
 
-func ActiveUsers(repo domain.UserRepository) ([]domain.User, error) {
-	users, err := repo.GetAll()
+func ActiveUsers(userRepo domain.UserRepository) ([]domain.User, error) {
+	users, err := userRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -23,8 +23,8 @@ func ActiveUsers(repo domain.UserRepository) ([]domain.User, error) {
 	return activeUsers, err
 }
 
-func InactiveUsers(repo domain.UserRepository) ([]domain.User, error) {
-	users, err := repo.GetAll()
+func InactiveUsers(userRepo domain.UserRepository) ([]domain.User, error) {
+	users, err := userRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -39,8 +39,8 @@ func InactiveUsers(repo domain.UserRepository) ([]domain.User, error) {
 	return inactiveUsers, err
 }
 
-func AllUsers(repo domain.UserRepository) ([]domain.User, error) {
-	users, err := repo.GetAll()
+func AllUsers(userRepo domain.UserRepository) ([]domain.User, error) {
+	users, err := userRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func AllUsers(repo domain.UserRepository) ([]domain.User, error) {
 	return users, err
 }
 
-func AddUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
+func AddUser(userRepo domain.UserRepository, args []string) ([]domain.User, error) {
 	if len(args) == 0 {
 		return nil, domain.ErrMissingLoginAndName
 	}
@@ -59,12 +59,12 @@ func AddUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
 		return nil, domain.ErrTooManyArguments
 	}
 
-	users, err := repo.GetAll()
+	users, err := userRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := repo.FindLogName(args[0], args[1])
+	user, err := userRepo.FindLogName(args[0], args[1])
 	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
 		return nil, err
 	}
@@ -76,15 +76,15 @@ func AddUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
 	} else {
 		maxId := -1
 
-		for _, user := range users {
-			if user.Id > maxId {
-				maxId = user.Id
+		for _, u := range users {
+			if u.Id > maxId {
+				maxId = u.Id
 			}
 		}
 
 		user = &domain.User{Id: maxId + 1, Login: args[0], Name: args[1], Status: true}
 
-		err = repo.Save(*user)
+		err = userRepo.Save(*user)
 		if err != nil {
 			return nil, err
 		}
@@ -93,7 +93,7 @@ func AddUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
 	}
 }
 
-func ActivateUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
+func ActivateUser(userRepo domain.UserRepository, args []string) ([]domain.User, error) {
 	if len(args) == 0 {
 		return nil, domain.ErrMissingID
 	}
@@ -106,7 +106,7 @@ func ActivateUser(repo domain.UserRepository, args []string) ([]domain.User, err
 		return nil, err
 	}
 
-	user, err := repo.FindId(userId)
+	user, err := userRepo.FindId(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -117,12 +117,12 @@ func ActivateUser(repo domain.UserRepository, args []string) ([]domain.User, err
 		return append([]domain.User{}, *user), domain.ErrUserAlreadyActive
 	}
 
-	err = repo.Activate(userId)
+	err = userRepo.Activate(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err = repo.FindId(userId)
+	user, err = userRepo.FindId(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func ActivateUser(repo domain.UserRepository, args []string) ([]domain.User, err
 	return append([]domain.User{}, *user), nil
 }
 
-func DeactivateUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
+func DeactivateUser(userRepo domain.UserRepository, args []string) ([]domain.User, error) {
 	if len(args) == 0 {
 		return nil, domain.ErrMissingID
 	}
@@ -143,7 +143,7 @@ func DeactivateUser(repo domain.UserRepository, args []string) ([]domain.User, e
 		return nil, err
 	}
 
-	user, err := repo.FindId(userId)
+	user, err := userRepo.FindId(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -154,12 +154,12 @@ func DeactivateUser(repo domain.UserRepository, args []string) ([]domain.User, e
 		return nil, domain.ErrUserAlreadyInactive
 	}
 
-	err = repo.Deactivate(userId)
+	err = userRepo.Deactivate(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err = repo.FindId(userId)
+	user, err = userRepo.FindId(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +167,7 @@ func DeactivateUser(repo domain.UserRepository, args []string) ([]domain.User, e
 	return append([]domain.User{}, *user), nil
 }
 
-func UpdateUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
+func UpdateUser(userRepo domain.UserRepository, args []string) ([]domain.User, error) {
 	if len(args) == 0 {
 		return nil, domain.ErrMissingNewUserFields
 	}
@@ -186,7 +186,7 @@ func UpdateUser(repo domain.UserRepository, args []string) ([]domain.User, error
 		return nil, err
 	}
 
-	user, err := repo.FindId(userId)
+	user, err := userRepo.FindId(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +203,7 @@ func UpdateUser(repo domain.UserRepository, args []string) ([]domain.User, error
 	user.Login = args[1]
 	user.Name = args[2]
 
-	err = repo.Update(*user)
+	err = userRepo.Update(*user)
 	if err != nil {
 		return nil, err
 	}
@@ -211,8 +211,8 @@ func UpdateUser(repo domain.UserRepository, args []string) ([]domain.User, error
 	return append([]domain.User{}, *user), nil
 }
 
-func CurrentUser(repo domain.UserRepository) ([]domain.User, error) {
-	user, err := repo.GetActive()
+func CurrentUser(userRepo domain.UserRepository) ([]domain.User, error) {
+	user, err := userRepo.GetActive()
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func CurrentUser(repo domain.UserRepository) ([]domain.User, error) {
 	return append([]domain.User{}, *user), nil
 }
 
-func SwitchUser(repo domain.UserRepository, args []string) ([]domain.User, error) {
+func SwitchUser(userRepo domain.UserRepository, args []string) ([]domain.User, error) {
 	if len(args) == 0 {
 		return nil, domain.ErrMissingActiveUserID
 	}
@@ -233,7 +233,7 @@ func SwitchUser(repo domain.UserRepository, args []string) ([]domain.User, error
 		return nil, err
 	}
 
-	user, err := repo.FindId(userId)
+	user, err := userRepo.FindId(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -241,7 +241,7 @@ func SwitchUser(repo domain.UserRepository, args []string) ([]domain.User, error
 		return nil, domain.ErrUserNotFound
 	}
 
-	err = repo.SetActive(user.Id)
+	err = userRepo.SetActive(user.Id)
 	if err != nil {
 		return nil, err
 	}

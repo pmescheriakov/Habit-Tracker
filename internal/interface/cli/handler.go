@@ -95,18 +95,23 @@ func HandleUser(repo domain.UserRepository, args []string) {
 	}
 }
 
-func HandleHabit(repo domain.UserRepository, args []string) {
+func HandleHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepository, args []string) {
 	switch args[0] {
 	case "add":
-		usecase.AddHabit(args[1:])
-	case "stop":
-		usecase.StopHabit(args[1:])
+		_, err := usecase.AddHabit(habitRepo, userRepo, args[1:])
+		if err != nil {
+			fmt.Println(err)
+		}
+	case "activate":
+		// usecase.ActivateHabit(repo, args[1:])
+	case "deactivate":
+		// usecase.DeactHabit(repo, args[1:])
 	case "change":
-		usecase.ChangeHabit(args[1:])
+		// usecase.ChangeHabit(repo, args[1:])
 	case "done":
-		usecase.MarkDoneHabit(args[1:])
+		// usecase.MarkDoneHabit(repo, args[1:])
 	case "undone":
-		usecase.MarkUndoneHabit(args[1:])
+		// usecase.MarkUndoneHabit(repo, args[1:])
 	default:
 		fmt.Println("Wrong command! --> Use just <help> entity-arg to see all possible commands!")
 	}

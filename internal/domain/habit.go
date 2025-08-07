@@ -3,9 +3,9 @@ package domain
 import "time"
 
 type Habit struct {
-	Id          int
-	DateCreated time.Time
-	Name        string
-	Done        bool
-	Active      bool
+	Id          int       `json:"Id"`
+	UserId      int       `json:"UserId"`
+	DateCreated time.Time `json:"DateCreated"`
+	Name        string    `json:"Name"`
+	Status      bool      `json:"Status"`
 }
