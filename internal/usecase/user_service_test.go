@@ -108,7 +108,7 @@ func TestAddUser(t *testing.T) {
 
 	// one arg
 	user, err = usecase.AddUser(repo, []string{"skebob"})
-	assert.Equal(t, domain.ErrMissingName, err)
+	assert.Equal(t, domain.ErrMissingUserName, err)
 	assert.Nil(t, user)
 
 	// many args
@@ -154,7 +154,7 @@ func TestActivateUser(t *testing.T) {
 
 	// no args
 	user, err := usecase.ActivateUser(repo, []string{})
-	require.Equal(t, domain.ErrMissingID, err)
+	require.Equal(t, domain.ErrMissingUserID, err)
 	assert.Nil(t, user)
 
 	// many args
@@ -197,7 +197,7 @@ func TestDeactivateUser(t *testing.T) {
 
 	// no args
 	user, err := usecase.DeactivateUser(repo, []string{})
-	require.Equal(t, domain.ErrMissingID, err)
+	require.Equal(t, domain.ErrMissingUserID, err)
 	assert.Nil(t, user)
 
 	// many args
@@ -241,12 +241,12 @@ func TestUpdateUser(t *testing.T) {
 
 	// one arg
 	user, err = usecase.UpdateUser(repo, []string{"1"})
-	require.Equal(t, domain.ErrMissingNewLoginName, err)
+	require.Equal(t, domain.ErrMissingNewUserLoginName, err)
 	assert.Nil(t, user)
 
 	// two args
 	user, err = usecase.UpdateUser(repo, []string{"0", "test0"})
-	require.Equal(t, domain.ErrMissingNewName, err)
+	require.Equal(t, domain.ErrMissingNewUserName, err)
 	assert.Nil(t, user)
 
 	// many args

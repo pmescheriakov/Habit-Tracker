@@ -8,22 +8,11 @@ import (
 	"github.com/pmescheriakov/Habit-Tracker/internal/interface/cli"
 )
 
-// main
+// main is the entry point of the Habit Tracker CLI application.
 //
-//	Entity <user> actions:
-//	- users: show users, active status and count of active tracking habits
-//	- add: add new user
-//	- stop: active to inactive status to user
-//	- change: change user info
-//	- switch: switch current user
-//	- info: info about user's nums habits, each streak and other
-//
-//	Entity <habit> actions:
-//	- add: add new habit to user
-//	- stop: stop active user's habit
-//	- change: change user's habit
-//	- done: mark today-done habit to user
-//	- undone: unmark today-done habit to user
+//	It parses command-line arguments and delegates handling to the appropriate
+//	entity-specific handler: user, habit, or help.
+//	If no arguments are provided, it prompts the user to use the help command.
 func main() {
 	args := os.Args[1:]
 	userRepo := db.NewJSONUserRepo("data/users.json", "data/active_user.json")

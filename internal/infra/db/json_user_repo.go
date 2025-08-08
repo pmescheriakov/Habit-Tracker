@@ -10,11 +10,19 @@ import (
 	"github.com/pmescheriakov/Habit-Tracker/internal/domain"
 )
 
+// JSONUserRepo is a JSON-based implementation of the UserRepository interface.
+//
+//	It stores user data and the active user ID in JSON files at the specified paths.
+//	Provides methods for CRUD operations, user activation/deactivation, and managing the active user.
 type JSONUserRepo struct {
 	filePath   string
 	activePath string
 }
 
+// NewJSONUserRepo creates a new JSONUserRepo instance.
+//
+//	It ensures the directories for data files exist and initializes JSON files if they are missing.
+//	Returns a pointer to the newly created JSONUserRepo.
 func NewJSONUserRepo(usersPath, activeUserPath string) *JSONUserRepo {
 	_ = os.MkdirAll(filepath.Dir(usersPath), 0755)
 	_ = os.MkdirAll(filepath.Dir(activeUserPath), 0755)
@@ -29,6 +37,10 @@ func NewJSONUserRepo(usersPath, activeUserPath string) *JSONUserRepo {
 	return &JSONUserRepo{filePath: usersPath, activePath: activeUserPath}
 }
 
+// writeUsers writes the provided list of users to the JSON file.
+//
+//	It overwrites the entire file with the given slice of users using indentation for readability.
+//	Returns an error if writing fails.
 func (usersRepo *JSONUserRepo) writeUsers(users []domain.User) error {
 	jsonDb, err := os.OpenFile(usersRepo.filePath, os.O_RDWR|os.O_TRUNC, 0666)
 	if err != nil {
@@ -52,6 +64,10 @@ func (usersRepo *JSONUserRepo) writeUsers(users []domain.User) error {
 	return nil
 }
 
+// GetAll retrieves all users from the JSON file.
+//
+//	Returns a slice of users or an error if reading or unmarshalling fails.
+//	If the file is empty, returns an empty slice.
 func (usersRepo *JSONUserRepo) GetAll() ([]domain.User, error) {
 	jsonDb, err := os.OpenFile(usersRepo.filePath, os.O_RDONLY, 0666)
 	if err != nil {
@@ -81,6 +97,9 @@ func (usersRepo *JSONUserRepo) GetAll() ([]domain.User, error) {
 	return users, nil
 }
 
+// FindLogName searches for a user by login and name.
+//
+//	Returns a pointer to the user if found, or ErrUserNotFound if not found.
 func (usersRepo *JSONUserRepo) FindLogName(login, name string) (*domain.User, error) {
 	users, err := usersRepo.GetAll()
 	if err != nil {
@@ -96,6 +115,9 @@ func (usersRepo *JSONUserRepo) FindLogName(login, name string) (*domain.User, er
 	return nil, domain.ErrUserNotFound
 }
 
+// FindId searches for a user by their ID.
+//
+//	Returns a pointer to the user if found, or ErrUserNotFound if not found.
 func (usersRepo *JSONUserRepo) FindId(id int) (*domain.User, error) {
 	users, err := usersRepo.GetAll()
 	if err != nil {
@@ -111,6 +133,10 @@ func (usersRepo *JSONUserRepo) FindId(id int) (*domain.User, error) {
 	return nil, domain.ErrUserNotFound
 }
 
+// Save appends a new user to the JSON file.
+//
+//	Reads all users, appends the new one, and writes back the updated slice.
+//	Returns an error if reading or writing fails.
 func (usersRepo *JSONUserRepo) Save(user domain.User) error {
 	users, err := usersRepo.GetAll()
 	if err != nil {
@@ -122,6 +148,10 @@ func (usersRepo *JSONUserRepo) Save(user domain.User) error {
 	return usersRepo.writeUsers(users)
 }
 
+// Update replaces an existing user in the JSON file.
+//
+//	Searches for the user by ID and replaces it with the provided user data.
+//	Returns an error if the user is not found or if reading/writing fails.
 func (usersRepo *JSONUserRepo) Update(user domain.User) error {
 	u, err := usersRepo.FindId(user.Id)
 	if err != nil {
@@ -141,6 +171,10 @@ func (usersRepo *JSONUserRepo) Update(user domain.User) error {
 	return usersRepo.writeUsers(users)
 }
 
+// Activate sets the status of a user to active (true) by their ID.
+//
+//	Returns ErrUserNotFound if the user does not exist.
+//	Returns an error if reading or writing fails.
 func (usersRepo *JSONUserRepo) Activate(userID int) error {
 	users, err := usersRepo.GetAll()
 	if err != nil {
@@ -160,6 +194,10 @@ func (usersRepo *JSONUserRepo) Activate(userID int) error {
 	return usersRepo.writeUsers(users)
 }
 
+// Deactivate sets the status of a user to inactive (false) by their ID.
+//
+//	Returns ErrUserNotFound if the user does not exist.
+//	Returns an error if reading or writing fails.
 func (usersRepo *JSONUserRepo) Deactivate(userID int) error {
 	users, err := usersRepo.GetAll()
 	if err != nil {
@@ -179,6 +217,10 @@ func (usersRepo *JSONUserRepo) Deactivate(userID int) error {
 	return usersRepo.writeUsers(users)
 }
 
+// SetActive sets the active user ID in the active user JSON file.
+//
+//	Validates that the user exists before writing the active user ID.
+//	Returns an error if the user does not exist or if writing fails.
 func (usersRepo *JSONUserRepo) SetActive(userID int) error {
 	jsonDb, err := os.OpenFile(usersRepo.activePath, os.O_RDWR|os.O_TRUNC, 0666)
 	if err != nil {
@@ -217,6 +259,10 @@ func (usersRepo *JSONUserRepo) SetActive(userID int) error {
 	return nil
 }
 
+// GetActive retrieves the currently active user from the JSON file.
+//
+//	If the active user ID is not set, initializes it to 0.
+//	Returns a pointer to the active user or an error if retrieval fails.
 func (usersRepo *JSONUserRepo) GetActive() (*domain.User, error) {
 	jsonDb, err := os.OpenFile(usersRepo.activePath, os.O_RDWR, 0666)
 	if err != nil {
@@ -256,6 +302,12 @@ func (usersRepo *JSONUserRepo) GetActive() (*domain.User, error) {
 			return nil, err
 		}
 
+		if _, err := jsonDb.Seek(0, 0); err != nil {
+			return nil, err
+		}
+		if err := jsonDb.Truncate(0); err != nil {
+			return nil, err
+		}
 		if _, err := jsonDb.Write(data); err != nil {
 			return nil, err
 		}

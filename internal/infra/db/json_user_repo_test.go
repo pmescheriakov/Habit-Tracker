@@ -243,6 +243,11 @@ func TestSetActive(t *testing.T) {
 	err := repo.SetActive(1)
 	require.Equal(t, domain.ErrUserNotFound, err)
 
+	// active user should be still unset when there are no users
+	pUser, err := repo.GetActive()
+	require.Equal(t, domain.ErrNoUsers, err)
+	assert.Nil(t, pUser)
+
 	// user exists
 	user0 := domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: true}
 	err = repo.Save(user0)
