@@ -29,11 +29,11 @@ func setupTestRepo(t *testing.T) (domain.UserRepository, string, string) {
 	return db.NewJSONUserRepo(usersPath, activePath), usersPath, activePath
 }
 
-func TestActiveUsers(t *testing.T) {
+func TestShowActiveUsers(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// no users
-	users, err := usecase.ActiveUsers(repo)
+	users, err := usecase.ShowActiveUsers(repo)
 	require.NoError(t, err)
 	assert.Equal(t, []domain.User{}, users)
 
@@ -47,18 +47,18 @@ func TestActiveUsers(t *testing.T) {
 
 	_, err = usecase.DeactivateUser(repo, []string{"1"})
 
-	users, err = usecase.ActiveUsers(repo)
+	users, err = usecase.ShowActiveUsers(repo)
 	require.NoError(t, err)
 	require.Equal(t, 2, len(users))
 	assert.Equal(t, domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: true}, users[0])
 	assert.Equal(t, domain.User{Id: 2, Login: "test2", Name: "TestUser2", Status: true}, users[1])
 }
 
-func TestInactiveUsers(t *testing.T) {
+func TestShowInactiveUsers(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// no users
-	users, err := usecase.ActiveUsers(repo)
+	users, err := usecase.ShowActiveUsers(repo)
 	require.NoError(t, err)
 	assert.Equal(t, []domain.User{}, users)
 
@@ -69,17 +69,17 @@ func TestInactiveUsers(t *testing.T) {
 
 	_, err = usecase.DeactivateUser(repo, []string{"1"})
 
-	users, err = usecase.InactiveUsers(repo)
+	users, err = usecase.ShowInactiveUsers(repo)
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(users))
 	assert.Equal(t, domain.User{Id: 1, Login: "test1", Name: "TestUser1", Status: false}, users[0])
 }
 
-func TestAllUsers(t *testing.T) {
+func TestShowAllUsers(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// no users
-	users, err := usecase.ActiveUsers(repo)
+	users, err := usecase.ShowActiveUsers(repo)
 	require.NoError(t, err)
 	assert.Equal(t, []domain.User{}, users)
 
@@ -90,7 +90,7 @@ func TestAllUsers(t *testing.T) {
 
 	_, err = usecase.DeactivateUser(repo, []string{"1"})
 
-	users, err = usecase.AllUsers(repo)
+	users, err = usecase.ShowAllUsers(repo)
 	require.NoError(t, err)
 	assert.Equal(t, 3, len(users))
 	assert.Equal(t, domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: true}, users[0])
@@ -142,7 +142,7 @@ func TestAddUser(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, domain.User{Id: 1, Login: "test1", Name: "TestUser1", Status: true}, user[0])
 
-	users, err := usecase.AllUsers(repo)
+	users, err := usecase.ShowAllUsers(repo)
 	require.NoError(t, err)
 	require.Equal(t, 2, len(users))
 	assert.Equal(t, domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: false}, users[0])

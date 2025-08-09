@@ -217,11 +217,11 @@ func (usersRepo *JSONUserRepo) Deactivate(userID int) error {
 	return usersRepo.writeUsers(users)
 }
 
-// SetActive sets the active user ID in the active user JSON file.
+// SetNewCurrent sets the active user ID in the active user JSON file.
 //
 //	Validates that the user exists before writing the active user ID.
 //	Returns an error if the user does not exist or if writing fails.
-func (usersRepo *JSONUserRepo) SetActive(userID int) error {
+func (usersRepo *JSONUserRepo) SetNewCurrent(userID int) error {
 	jsonDb, err := os.OpenFile(usersRepo.activePath, os.O_RDWR|os.O_TRUNC, 0666)
 	if err != nil {
 		return err
@@ -259,11 +259,11 @@ func (usersRepo *JSONUserRepo) SetActive(userID int) error {
 	return nil
 }
 
-// GetActive retrieves the currently active user from the JSON file.
+// GetCurrent retrieves the currently active user from the JSON file.
 //
 //	If the active user ID is not set, initializes it to 0.
 //	Returns a pointer to the active user or an error if retrieval fails.
-func (usersRepo *JSONUserRepo) GetActive() (*domain.User, error) {
+func (usersRepo *JSONUserRepo) GetCurrent() (*domain.User, error) {
 	jsonDb, err := os.OpenFile(usersRepo.activePath, os.O_RDWR, 0666)
 	if err != nil {
 		return nil, err

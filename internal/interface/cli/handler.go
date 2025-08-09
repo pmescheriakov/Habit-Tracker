@@ -64,19 +64,19 @@ func printHabits(habits []domain.Habit, title string) {
 func HandleUser(repo domain.UserRepository, args []string) {
 	switch args[0] {
 	case "active_users":
-		users, err := usecase.ActiveUsers(repo)
+		users, err := usecase.ShowActiveUsers(repo)
 		if err != nil {
 			fmt.Println(err)
 		}
 		printUsers(users, "== ALL ACTIVE USERS ==")
 	case "inactive_users":
-		users, err := usecase.InactiveUsers(repo)
+		users, err := usecase.ShowInactiveUsers(repo)
 		if err != nil {
 			fmt.Println(err)
 		}
 		printUsers(users, "== ALL INACTIVE USERS ==")
 	case "all_users":
-		users, err := usecase.AllUsers(repo)
+		users, err := usecase.ShowAllUsers(repo)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -137,7 +137,7 @@ func HandleUser(repo domain.UserRepository, args []string) {
 //	 It delegates execution to the appropriate use case functions based on the provided subcommand in args[0].
 //	 Supported commands:
 //			add,
-//			activate, deact, change,
+//			activate, deactivate, update,
 //			done, undone.
 //
 //	 It prints the result or any error messages to the console.
@@ -155,18 +155,18 @@ func HandleHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepositor
 			fmt.Println(err)
 		}
 		printHabits(habits, "== ACTIVATE SUCCESS, HABIT ==")
-	case "deact":
-		habits, err := usecase.DeactHabit(habitRepo, userRepo, args[1:])
+	case "deactivate":
+		habits, err := usecase.DeactivateHabit(habitRepo, userRepo, args[1:])
 		if err != nil {
 			fmt.Println(err)
 		}
 		printHabits(habits, "== DEACTIVATE SUCCESS, HABIT ==")
-	case "change":
-		habits, err := usecase.ChangeHabit(habitRepo, userRepo, args[1:])
+	case "update":
+		habits, err := usecase.UpdateHabit(habitRepo, userRepo, args[1:])
 		if err != nil {
 			fmt.Println(err)
 		}
-		printHabits(habits, "== CHANGE SUCCESS, HABIT ==")
+		printHabits(habits, "== UPDATE SUCCESS, HABIT ==")
 	case "done":
 		// TODO: usecase.MarkDoneHabit(habitRepo, userRepo, args[1:])
 	case "undone":

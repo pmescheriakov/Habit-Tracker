@@ -8,6 +8,6 @@ type UserRepository interface {
 	Update(user User) error
 	Activate(userID int) error
 	Deactivate(userID int) error
-	SetActive(userID int) error
-	GetActive() (*User, error)
+	SetNewCurrent(userID int) error
+	GetCurrent() (*User, error)
 }

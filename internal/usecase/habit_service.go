@@ -115,12 +115,12 @@ func ActivateHabit(habitRepo domain.HabitRepository, userRepo domain.UserReposit
 	return append([]domain.Habit{}, *habit), nil
 }
 
-// DeactHabit deactivates an active habit for the current active user.
+// DeactivateHabit deactivates an active habit for the current active user.
 //
 //	It validates the provided habit ID, ensures the habit exists and is active,
 //	and updates its status to inactive.
 //	Returns the updated habit or an error if the operation fails.
-func DeactHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepository, args []string) ([]domain.Habit, error) {
+func DeactivateHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepository, args []string) ([]domain.Habit, error) {
 	if len(args) == 0 {
 		return nil, domain.ErrMissingHabitID
 	}
@@ -162,12 +162,12 @@ func DeactHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepository
 	return append([]domain.Habit{}, *habit), nil
 }
 
-// ChangeHabit updates the name of an active habit for the current active user.
+// UpdateHabit updates the name of an active habit for the current active user.
 //
 //	It validates the provided habit ID and new name, ensures the habit exists,
 //	is active, and the name is different, then updates it.
 //	Returns the updated habit or an error if the operation fails.
-func ChangeHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepository, args []string) ([]domain.Habit, error) {
+func UpdateHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepository, args []string) ([]domain.Habit, error) {
 	if len(args) == 0 {
 		return nil, domain.ErrMissingNewHabitFields
 	}

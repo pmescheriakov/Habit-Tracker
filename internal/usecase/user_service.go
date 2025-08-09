@@ -7,11 +7,11 @@ import (
 	"github.com/pmescheriakov/Habit-Tracker/internal/domain"
 )
 
-// ActiveUsers retrieves all active users from the repository.
+// ShowActiveUsers retrieves all active users from the repository.
 //
 //	It filters the complete user list, returning only those with Status set to true.
 //	Returns the list of active users or an error if retrieval fails.
-func ActiveUsers(userRepo domain.UserRepository) ([]domain.User, error) {
+func ShowActiveUsers(userRepo domain.UserRepository) ([]domain.User, error) {
 	users, err := userRepo.GetAll()
 	if err != nil {
 		return nil, err
@@ -27,11 +27,11 @@ func ActiveUsers(userRepo domain.UserRepository) ([]domain.User, error) {
 	return activeUsers, err
 }
 
-// InactiveUsers retrieves all inactive users from the repository.
+// ShowInactiveUsers retrieves all inactive users from the repository.
 //
 //	It filters the complete user list, returning only those with Status set to false.
 //	Returns the list of inactive users or an error if retrieval fails.
-func InactiveUsers(userRepo domain.UserRepository) ([]domain.User, error) {
+func ShowInactiveUsers(userRepo domain.UserRepository) ([]domain.User, error) {
 	users, err := userRepo.GetAll()
 	if err != nil {
 		return nil, err
@@ -47,10 +47,10 @@ func InactiveUsers(userRepo domain.UserRepository) ([]domain.User, error) {
 	return inactiveUsers, err
 }
 
-// AllUsers retrieves all users from the repository.
+// ShowAllUsers retrieves all users from the repository.
 //
 //	Returns the list of all users or an error if retrieval fails.
-func AllUsers(userRepo domain.UserRepository) ([]domain.User, error) {
+func ShowAllUsers(userRepo domain.UserRepository) ([]domain.User, error) {
 	users, err := userRepo.GetAll()
 	if err != nil {
 		return nil, err
@@ -246,7 +246,7 @@ func UpdateUser(userRepo domain.UserRepository, args []string) ([]domain.User, e
 //
 //	Returns a slice containing the active user or an error if retrieval fails.
 func CurrentUser(userRepo domain.UserRepository) ([]domain.User, error) {
-	user, err := userRepo.GetActive()
+	user, err := userRepo.GetCurrent()
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +280,7 @@ func SwitchUser(userRepo domain.UserRepository, args []string) ([]domain.User, e
 		return nil, domain.ErrUserNotFound
 	}
 
-	err = userRepo.SetActive(user.Id)
+	err = userRepo.SetNewCurrent(user.Id)
 	if err != nil {
 		return nil, err
 	}

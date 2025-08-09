@@ -29,7 +29,7 @@ func setupTestRepo(t *testing.T) (domain.UserRepository, string, string) {
 	return db.NewJSONUserRepo(usersPath, activePath), usersPath, activePath
 }
 
-func TestGetAll(t *testing.T) {
+func TestGetAllUsers(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// empty file
@@ -69,7 +69,7 @@ func TestGetAll(t *testing.T) {
 	}
 }
 
-func TestFindLogName(t *testing.T) {
+func TestFindUserLogName(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// empty file
@@ -99,7 +99,7 @@ func TestFindLogName(t *testing.T) {
 	assert.Nil(t, pUser)
 }
 
-func TestFindId(t *testing.T) {
+func TestFindUserId(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// empty file
@@ -129,7 +129,7 @@ func TestFindId(t *testing.T) {
 	assert.Nil(t, pUser)
 }
 
-func TestSave(t *testing.T) {
+func TestSaveUser(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	user0 := domain.User{Id: 0, Login: "test0", Name: "TestUser0", Status: true}
@@ -144,7 +144,7 @@ func TestSave(t *testing.T) {
 	assert.Equal(t, user0.Name, users[0].Name)
 }
 
-func TestUpdate(t *testing.T) {
+func TestUpdateUser(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// empty file
@@ -188,7 +188,7 @@ func TestUpdate(t *testing.T) {
 	assert.Nil(t, pUser)
 }
 
-func TestActivate(t *testing.T) {
+func TestActivateUser(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// no user
@@ -212,7 +212,7 @@ func TestActivate(t *testing.T) {
 	assert.Equal(t, !user1.Status, userAfterDeactivate.Status)
 }
 
-func TestDeactivate(t *testing.T) {
+func TestDeactivateUser(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// no user
@@ -236,15 +236,15 @@ func TestDeactivate(t *testing.T) {
 	assert.Equal(t, !user1.Status, userAfterDeactivate.Status)
 }
 
-func TestSetActive(t *testing.T) {
+func TestSetNewCurrent(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// no user
-	err := repo.SetActive(1)
+	err := repo.SetNewCurrent(1)
 	require.Equal(t, domain.ErrUserNotFound, err)
 
 	// active user should be still unset when there are no users
-	pUser, err := repo.GetActive()
+	pUser, err := repo.GetCurrent()
 	require.Equal(t, domain.ErrNoUsers, err)
 	assert.Nil(t, pUser)
 
@@ -257,20 +257,20 @@ func TestSetActive(t *testing.T) {
 	err = repo.Save(user1)
 	require.NoError(t, err)
 
-	err = repo.SetActive(1)
+	err = repo.SetNewCurrent(1)
 	require.NoError(t, err)
 
-	userActId, err := repo.GetActive()
+	userActId, err := repo.GetCurrent()
 	require.NoError(t, err)
 	assert.Equal(t, *userActId, user1)
 }
 
-func TestGetActive(t *testing.T) {
+func TestGetCurrent(t *testing.T) {
 	// no users exists
 	repo, _, _ := setupTestRepo(t)
 
 	// empty active file
-	pUser, err := repo.GetActive()
+	pUser, err := repo.GetCurrent()
 	require.Equal(t, domain.ErrNoUsers, err)
 	assert.Nil(t, pUser)
 
@@ -286,22 +286,22 @@ func TestGetActive(t *testing.T) {
 	require.NoError(t, err)
 
 	// empty active file
-	pUser, err = repo.GetActive()
+	pUser, err = repo.GetCurrent()
 	require.NoError(t, err)
 	require.NotNil(t, pUser)
 	assert.Equal(t, 0, pUser.Id)
 
 	// init active file
-	pUser, err = repo.GetActive()
+	pUser, err = repo.GetCurrent()
 	require.NoError(t, err)
 	require.NotNil(t, pUser)
 	assert.Equal(t, 0, pUser.Id)
 
 	//
-	err = repo.SetActive(1)
+	err = repo.SetNewCurrent(1)
 	require.NoError(t, err)
 
-	pUser, err = repo.GetActive()
+	pUser, err = repo.GetCurrent()
 	require.NoError(t, err)
 	require.NotNil(t, pUser)
 	assert.Equal(t, 1, pUser.Id)
