@@ -58,7 +58,7 @@ func TestShowInactiveUsers(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// no users
-	users, err := usecase.ShowActiveUsers(repo)
+	users, err := usecase.ShowInactiveUsers(repo)
 	require.NoError(t, err)
 	assert.Equal(t, []domain.User{}, users)
 
@@ -79,7 +79,7 @@ func TestShowAllUsers(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 
 	// no users
-	users, err := usecase.ShowActiveUsers(repo)
+	users, err := usecase.ShowAllUsers(repo)
 	require.NoError(t, err)
 	assert.Equal(t, []domain.User{}, users)
 

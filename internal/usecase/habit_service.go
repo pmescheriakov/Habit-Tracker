@@ -26,6 +26,14 @@ func AddHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepository, 
 		return nil, err
 	}
 
+	allUsers, err := userRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	if len(allUsers) == 0 {
+		return nil, domain.ErrNoUsers
+	}
+
 	currentUser, err := CurrentUser(userRepo)
 	if err != nil {
 		return nil, err
@@ -42,17 +50,8 @@ func AddHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepository, 
 		return nil, domain.ErrHabitExistsInactive
 	} else {
 		maxId := -1
-
-		userHabits := make([]domain.Habit, 0)
-
-		for _, habit := range habits {
-			if habit.UserId == currentUser[0].Id && habit.Id > maxId {
-				userHabits = append(userHabits, habit)
-			}
-		}
-
-		for _, h := range userHabits {
-			if h.Id > maxId {
+		for _, h := range habits {
+			if h.UserId == currentUser[0].Id && h.Id > maxId {
 				maxId = h.Id
 			}
 		}
@@ -84,6 +83,14 @@ func ActivateHabit(habitRepo domain.HabitRepository, userRepo domain.UserReposit
 	habitId, err := strconv.Atoi(args[0])
 	if err != nil {
 		return nil, err
+	}
+
+	allUsers, err := userRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	if len(allUsers) == 0 {
+		return nil, domain.ErrNoUsers
 	}
 
 	currentUser, err := CurrentUser(userRepo)
@@ -131,6 +138,14 @@ func DeactivateHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepos
 	habitId, err := strconv.Atoi(args[0])
 	if err != nil {
 		return nil, err
+	}
+
+	allUsers, err := userRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	if len(allUsers) == 0 {
+		return nil, domain.ErrNoUsers
 	}
 
 	currentUser, err := CurrentUser(userRepo)
@@ -183,6 +198,14 @@ func UpdateHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepositor
 		return nil, err
 	}
 
+	allUsers, err := userRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	if len(allUsers) == 0 {
+		return nil, domain.ErrNoUsers
+	}
+
 	currentUser, err := CurrentUser(userRepo)
 	if err != nil {
 		return nil, err
@@ -212,18 +235,20 @@ func UpdateHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepositor
 	return append([]domain.Habit{}, *habit), nil
 }
 
-// MarkDoneHabit marks a habit as done for the current day.
+// MarkDone marks a habit as done for the current day.
 //
 //	Currently a placeholder for implementation.
 //	Should update the habit log to reflect today's completion status.
-func MarkDoneHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepository, args []string) ([]domain.Habit, error) {
+func MarkDone(habitRepo domain.HabitRepository, userRepo domain.UserRepository, args []string) ([]domain.Habit, error) {
+	// TODO: MarkDone
 	return nil, nil
 }
 
-// MarkUndoneHabit marks a habit as undone for the current day.
+// MarkUndone marks a habit as undone for the current day.
 //
 //	Currently a placeholder for implementation.
 //	Should update the habit log to remove today's completion status.
-func MarkUndoneHabit(habitRepo domain.HabitRepository, userRepo domain.UserRepository, args []string) ([]domain.Habit, error) {
+func MarkUndone(habitRepo domain.HabitRepository, userRepo domain.UserRepository, args []string) ([]domain.Habit, error) {
+	// TODO: MarkUndone
 	return nil, nil
 }
